@@ -16,6 +16,24 @@ async function getUser(email: string): Promise<User | undefined> {
   }
 }
 
+export function regist(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  console.log("testtestest")
+  console.log(formData)
+  const parsedFormData = z.object({email: z.string().email(), password: z.string().min(6) }).safeParse(formData)
+  console.log(parsedFormData)
+ if (parsedFormData.success){
+  const {email,password} = parsedFormData.data;
+  console.log(email + " / " + password);
+ }else{
+  console.log(parsedFormData.error);
+  return null;
+ }
+  // const res = createUser(email:string, password: string):Primise
+}
+
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
