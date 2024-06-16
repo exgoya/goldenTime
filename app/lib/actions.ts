@@ -145,7 +145,7 @@ export async function signUp(
   formData: FormData,
 ) {
   try {
-    await regist('credentials', formData);
+  await regist('credentials', formData);
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {

@@ -21,20 +21,22 @@ export function regist(
   formData: FormData,
 ) {
   console.log("testtestest")
-  console.log(formData)
-  const parsedFormData = z.object({email: z.string().email(), password: z.string().min(6) }).safeParse(formData)
-  console.log(parsedFormData)
- if (parsedFormData.success){
-  const {email,password} = parsedFormData.data;
+  //console.log(formData)
+  //const parsedFormData  = z.object( {email: z.string().email().nullish(), password: z.string().min(6).nullish() }).safeParse(formData)
+  //const parsedFormData  = z.object( {email: z.string().email(), password: z.string().min(6) }).safeParse(formData.entries())
+  const parsedFormData  = z.object( {email: z.string().email(), password: z.string().min(6) }).parse(formData)
+  //console.log(parsedFormData)
+ if (parsedFormData){
+  const {email ,password} = parsedFormData;
   console.log(email + " / " + password);
  }else{
-  console.log(parsedFormData.error);
+  console.log(parsedFormData);
   return null;
  }
   // const res = createUser(email:string, password: string):Primise
 }
 
-export const { auth, signIn, signOut } = NextAuth({
+export const { auth, signIn, signOut} = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
@@ -42,17 +44,16 @@ export const { auth, signIn, signOut } = NextAuth({
         const parsedCredentials = z
           .object({ email: z.string().email(), password: z.string().min(6) })
           .safeParse(credentials);
-
+        console.log(parsedCredentials)
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
 
           const user = await getUser(email);
           if (!user) return null;
-
+          
           const passwordsMatch = await bcrypt.compare(password, user.password);
           if (passwordsMatch) return user;
         }
-
         console.log('Invalid credentials');
         return null;
       },
