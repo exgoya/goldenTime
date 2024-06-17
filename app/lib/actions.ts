@@ -21,9 +21,18 @@ const FormSchema = z.object({
   date: z.string(),
 });
 
+const LocationSchema = z.object({
+  id: z.string(),
+  name: z.string().min(2,{ message: "Must be input Company Name" }),
+  address: z.string().min(2,{ message: "Must be input Address" }),
+  detail_address: z.string(),
+  description: z.string(),
+});
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
+
 const UpdateInvoice = FormSchema.omit({ date: true, id: true });
 
+const CreateLocation = LocationSchema.omit({ id: true });
 // This is temporary
 export type State = {
   errors?: {
@@ -33,6 +42,55 @@ export type State = {
   };
   message?: string | null;
 };
+
+export type gState = {
+  errors?: {
+    name?: string[];
+    address?: string[];
+    detail_address?: string[];
+    description?: string[];
+  };
+  message?: string | null;
+};
+
+
+export async function createLocation(prevState: gState, formData: FormData) {
+  // Validate form fields using Zod
+  const validatedFields = CreateLocation.safeParse({
+    name: formData.get('name'),
+    address: formData.get('address'),
+    detail_address: formData.get('detail_address'),
+    description: formData.get('description'),
+  });
+
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Location.',
+    };
+  }
+
+  // Prepare data for insertion into the database
+  const { name,address,detail_address,description  } = validatedFields.data;
+
+  // Insert data into the database
+  try {
+    await sql`
+      INSERT INTO g_locations (name, address, detail_address , description)
+      VALUES (${name}, ${address}, ${detail_address}, ${description})
+    `;
+  } catch (error) {
+    // If a database error occurs, return a more specific error.
+    return {
+      message: 'Database Error: Failed to Create Invoice.',
+    };
+  }
+
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath('/dashboard/locations');
+  redirect('/dashboard/locations');
+}
 
 export async function createInvoice(prevState: State, formData: FormData) {
   // Validate form fields using Zod
@@ -119,6 +177,19 @@ export async function deleteInvoice(id: string) {
     return { message: 'Database Error: Failed to Delete Invoice.' };
   }
 }
+
+export async function deleteLocation(id: string) {
+  // throw new Error('Failed to Delete Invoice');
+
+  try {
+    await sql`DELETE FROM g_locations WHERE id = ${id}`;
+    revalidatePath('/dashboard/location');
+    return { message: 'Deleted location' };
+  } catch (error) {
+    return { message: 'Database Error: Failed to Delete Location.' };
+  }
+}
+
 
 export async function authenticate(
   prevState: string | undefined,

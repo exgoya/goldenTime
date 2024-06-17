@@ -26,6 +26,14 @@ export type Invoice = {
   status: 'pending' | 'paid';
 };
 
+export type Location = {
+  id: string;
+  name: string;
+  address: string;
+  detail_address: string;
+  description:string;
+}
+
 export type Revenue = {
   month: string;
   revenue: number;

@@ -7,6 +7,7 @@ import {
   LatestInvoiceRaw,
   User,
   Revenue,
+  Location
 } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
@@ -172,6 +173,84 @@ export async function fetchInvoiceById(id: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoice.');
+  }
+}
+export async function fetchFilteredLocations(
+  query: string,
+  currentPage: number,
+) {
+  noStore();
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const locations = await sql<Location>`
+      SELECT
+        id,
+        name,
+        address,
+        detail_address,
+        description  
+      FROM g_locations
+      WHERE
+        name ILIKE ${`%${query}%`} OR
+        address ILIKE ${`%${query}%`} OR
+        detail_address ILIKE ${`%${query}%`} OR
+        description ILIKE ${`%${query}%`}
+      ORDER BY name DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+
+    return locations.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch invoices.');
+  }
+}
+
+export async function fetchLocationsPages(query: string) {
+  noStore();
+  try {
+    const count = await sql`SELECT COUNT(*)
+    FROM g_locations
+    WHERE
+      name ILIKE ${`%${query}%`} OR
+      address ILIKE ${`%${query}%`} OR
+      detail_address ILIKE ${`%${query}%`} OR
+      description ILIKE ${`%${query}%`}
+  `;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of locations.');
+  }
+}
+
+export async function fetchLocationsById(id: string) {
+  noStore();
+  try {
+    const data = await sql<Location>`
+      SELECT
+        id,
+        name,
+        address,
+        detail_address,
+        description
+      FROM locations
+      WHERE id = ${id};
+    `;
+
+    const location = data.rows.map((location) => ({
+      ...location,
+      // Convert amount from cents to dollars
+      //amount: location.amount / 100,
+    }));
+
+    return location[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch location.');
   }
 }
 
