@@ -72,7 +72,6 @@ export type EngineerTable = {
   company_name : string;
 };
 
-
 export type Company = {
   id: string;
   name: string;

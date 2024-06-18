@@ -1,5 +1,6 @@
-import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import { fetchFilteredEngineers  } from '@/app/lib/data';
+import { UpdateEngineer, DeleteEngineer } from '@/app/ui/engineers/buttons';
+// import { DeleteEngineer, UpdateEngineer } from './buttons';
 
 export default async function EngineersTable({
   query,
@@ -52,8 +53,8 @@ export default async function EngineersTable({
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <div className="flex justify-end gap-2">
-                    <UpdateInvoice id={engineer.id} />
-                    <DeleteInvoice id={engineer.id} />
+                    <UpdateEngineer id={engineer.id} />
+                    <DeleteEngineer id={engineer.id} />
                   </div>
                 </div>
               </div>
@@ -112,8 +113,8 @@ export default async function EngineersTable({
                   
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <UpdateInvoice id={engineer.id} />
-                      <DeleteInvoice id={engineer.id} />
+                      <UpdateEngineer id={engineer.id} />
+                      <DeleteEngineer id={engineer.id} />
                     </div>
                   </td>
                 </tr>

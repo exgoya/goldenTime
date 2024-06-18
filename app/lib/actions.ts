@@ -59,6 +59,7 @@ const CompanySchema = z.object({
 
 export type companyState = {
   errors?: {
+    id?: string[];
     name?: string[];
     description?: string[];
   };
@@ -80,7 +81,7 @@ const EngineerSchema = z.object({
   phone: z.string().regex(phoneRegex, 'Invalid Number!'),
   duty: z.string().min(2,{ message: "Must be input Name" }),
   companyId: z.string({ invalid_type_error: 'Please select a company.', }),
-  companyName: z.string(),
+  // companyName: z.string(),
 });
 
 export type engState = {
@@ -119,6 +120,7 @@ export async function createEngineer(prevState: engState, formData: FormData) {
   }
 
   // Prepare data for insertion into the database
+  console.log(validatedFields.data)
   const { nickName, name, email, phone, duty,companyId } = validatedFields.data;
 
   // Insert data into the database
@@ -129,6 +131,7 @@ export async function createEngineer(prevState: engState, formData: FormData) {
     `;
   } catch (error) {
     // If a database error occurs, return a more specific error.
+    console.log(error)
     return {
       message: 'Database Error: Failed to Create Engineer.',
     };
@@ -178,12 +181,12 @@ export async function updateEngineer(
 
 export async function deleteEngineer(id: string) {
   // throw new Error('Failed to Delete Engineer');
-
   try {
     await sql`DELETE FROM g_engineers WHERE id = ${id}`;
     revalidatePath('/dashboard/engineers');
     return { message: 'Deleted Engineer' };
   } catch (error) {
+    console.log(error)
     return { message: 'Database Error: Failed to Delete Engineer.' };
   }
 }

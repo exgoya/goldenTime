@@ -15,6 +15,25 @@ import {
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
 
+export async function fetchCompanys() {
+  try {
+    const data = await sql<Company>`
+      SELECT
+        id,
+        name
+      FROM g_companys
+      ORDER BY name ASC
+    `;
+
+    const companys = data.rows;
+    return companys;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all customers.');
+  }
+}
+
+
 export async function fetchRevenue() {
   // Add noStore() here to prevent the response from being cached.
   // This is equivalent to in fetch(..., {cache: 'no-store'}).
@@ -189,13 +208,14 @@ export async function fetchFilteredEngineers(
   try {
     const engineers = await sql<EngineerTable>`
       SELECT
+        e.id,
         e.nick_name,
         e.name,
         e.email,
         e.duty,
         e.phone,
-        c.id,
-        c.name
+        e.company_id,
+        c.name as company_name
       FROM g_engineers e
       JOIN g_companys c ON e.company_id = c.id
       WHERE
