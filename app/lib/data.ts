@@ -11,6 +11,11 @@ import {
   Company,
   Engineer,
   EngineerTable,
+  Gcustomer,
+  GcustomerTable,
+  issueTable,
+  issue,
+  EngineerField
 } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
@@ -195,6 +200,192 @@ export async function fetchInvoiceById(id: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoice.');
+  }
+}
+
+export async function fetchFilteredIssues(
+  query: string,
+  currentPage: number,
+) {
+  noStore();
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const issues = await sql<issueTable>`
+      SELECT
+        i.id,
+        i.title,
+        i.description,
+        i.status,
+        i.opened,
+        i.modified,
+        e.id as engineer_id,
+        e.nick_name as engineer_nick_name,
+        e.duty as engineer_duty,
+        c.id as customer_id,
+        c.duty as customer_name,
+        c.duty as customer_duty
+      FROM g_issues i
+      LEFT JOIN g_customers c ON i.customer_id = c.id
+      LEFT JOIN g_engineers e ON i.engineer_id = e.id
+      WHERE
+        i.title ILIKE ${`%${query}%`} OR
+        i.description ILIKE ${`%${query}%`} OR
+        i.status ILIKE ${`%${query}%`} OR
+        e.nick_name ILIKE ${`%${query}%`} OR
+        e.duty ILIKE ${`%${query}%`} OR
+        c.name ILIKE ${`%${query}%`} OR
+        c.duty ILIKE ${`%${query}%`} 
+      ORDER BY i.modified desc
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+
+    console.log(issues.rows)
+    return issues.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch issues.');
+  }
+}
+
+export async function fetchIssuesPages(query: string) {
+  noStore();
+  try {
+    const count = await sql`SELECT COUNT(*)
+      FROM g_issues i
+      LEFT JOIN g_customers c ON i.customer_id = c.id
+      LEFT JOIN g_engineers e ON i.engineer_id = e.id
+      WHERE
+        i.title ILIKE ${`%${query}%`} OR
+        i.description ILIKE ${`%${query}%`} OR
+        i.status ILIKE ${`%${query}%`} OR
+        e.nick_name ILIKE ${`%${query}%`} OR
+        e.duty ILIKE ${`%${query}%`} OR
+        c.name ILIKE ${`%${query}%`} OR
+        c.duty ILIKE ${`%${query}%`} 
+ `;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of issue.');
+  }
+}
+
+export async function fetchIssueById(id: string) {
+  noStore();
+  try {
+    const data = await sql<issue>`
+      SELECT
+        id,
+        title,
+        description,
+        status,
+        opened,
+        modified,
+        engineer_id,
+        customer_id
+      FROM g_issues
+      WHERE id = ${id};
+    `;
+
+    const issues = data.rows.map((issue) => ({
+      ...issue,
+      // Convert amount from cents to dollars
+    }));
+
+    console.log(issues)
+    return issues[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch issue.');
+  }
+}
+
+
+export async function gfetchFilteredCustomers(
+  query: string,
+  currentPage: number,
+) {
+  noStore();
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const customers = await sql<GcustomerTable>`
+      SELECT
+        e.id,
+        e.name,
+        e.email,
+        e.duty,
+        e.phone,
+        e.company_id,
+        c.name as company_name
+      FROM g_customers e
+      JOIN g_companys c ON e.company_id = c.id
+      WHERE
+        e.name ILIKE ${`%${query}%`} OR
+        e.email ILIKE ${`%${query}%`} OR
+        e.duty ILIKE ${`%${query}%`} OR
+        e.phone ILIKE ${`%${query}%`} OR
+        c.name ILIKE ${`%${query}%`}
+      ORDER BY e.name
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+
+    return customers.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch customers.');
+  }
+}
+
+export async function fetchCustomersPages(query: string) {
+  noStore();
+  try {
+    const count = await sql`SELECT COUNT(*)
+      FROM g_customers e
+      JOIN g_companys c ON e.company_id = c.id
+      WHERE
+        e.name ILIKE ${`%${query}%`} OR
+        e.email ILIKE ${`%${query}%`} OR
+        e.duty ILIKE ${`%${query}%`} OR
+        e.phone ILIKE ${`%${query}%`} OR
+        c.name ILIKE ${`%${query}%`}
+  `;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of customer.');
+  }
+}
+
+export async function fetchCustomerById(id: string) {
+  noStore();
+  try {
+    const data = await sql<Gcustomer>`
+      SELECT
+        id,
+        name,
+        email,
+        duty,
+        phone,
+        company_id
+      FROM g_customers
+      WHERE id = ${id};
+    `;
+
+    const customers = data.rows.map((customer) => ({
+      ...customer,
+      // Convert amount from cents to dollars
+    }));
+
+    return customers[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch engineer.');
   }
 }
 
@@ -446,15 +637,32 @@ export async function fetchCustomers() {
       SELECT
         id,
         name
-      FROM customers
+      FROM g_customers
       ORDER BY name ASC
     `;
 
-    const customers = data.rows;
-    return customers;
+    return data.rows;
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all customers.');
+  }
+}
+
+
+export async function fetchEngineers() {
+  try {
+    const data = await sql<EngineerField>`
+      SELECT
+        id,
+        nick_name
+      FROM g_engineers
+      ORDER BY nick_name ASC
+    `;
+
+    return data.rows;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all engineers.');
   }
 }
 

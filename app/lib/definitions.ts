@@ -50,6 +50,56 @@ export type InvoicesTable = {
   status: 'pending' | 'paid';
 };
 
+export type Gcustomer = {
+  id: string;
+  name: string;
+  email: string;
+  duty: string;
+  phone: string;
+  company_id : string;
+};
+
+export type GcustomerTable = {
+  id: string;
+  name: string;
+  email: string;
+  duty: string;
+  phone: string;
+  company_id : string;
+  company_name : string;
+};
+
+export type issue = {
+  id: string;
+  title: string;
+  description: string;
+  status: 'open'|'feedback'|'close';
+  opened: string;
+  modified: string;
+  engineer_id : string;
+  customer_id : string;
+};
+
+export type issueTable = {
+  id: string;
+  title: string;
+  description: string;
+  status: 'open'|'feedback'|'close';
+  opened: string;
+  modified: string;
+  engineer_id : string;
+  engineer_nick_name : string;
+  engineer_duty : string;
+  customer_id : string;
+  customer_name : string;
+  customer_duty : string;
+};
+
+
+export type EngineerField = {
+  id: string;
+  nick_name: string;
+};
 
 export type Engineer = {
   id: string;

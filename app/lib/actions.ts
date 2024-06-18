@@ -69,9 +69,248 @@ export type companyState = {
 const CreateCompany = CompanySchema.omit({ id: true });
 const UpdateCompany = CompanySchema.omit({ id: true });
 
+
+const IssueSchema = z.object({
+  id: z.string(),
+  title: z.string().min(2,{ message: "Must be input Name" }),
+  description: z.string().min(2,{ message: "Must be input Name" }),
+  status: z.enum(['open', 'feedback','close'], {
+    invalid_type_error: 'Please select an issue status.',
+  }),
+  opened:z.string(),
+  modified:z.string(),
+  engineerId: z.string({ invalid_type_error: 'Please select a engineer.', }),
+  customerId: z.string({ invalid_type_error: 'Please select a customer.', }),
+});
+
+export type issueState = {
+  errors?: {
+    title?: string[];
+    description?: string[];
+    status?: string[];
+    engineerId?: string[];
+    customerId?: string[];
+  };
+  message?: string | null;
+};
+
+const CreateIssue = IssueSchema.omit({ id: true,opened: true,modified:true });
+const UpdateIssue = IssueSchema.omit({ id: true,opened: true,modified:true });
+
+export async function createIssue(prevState: issueState, formData: FormData) {
+  // Validate form fields using Zod
+  const validatedFields = CreateIssue.safeParse({
+    title: formData.get('title'),
+    description: formData.get('description'),
+    status: formData.get('status'),
+    engineerId: formData.get('engineerId'),
+    customerId: formData.get('customerId'),
+  });
+
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Issue.',
+    };
+  }
+
+  // Prepare data for insertion into the database
+  console.log(validatedFields.data)
+  const { title,description,status,engineerId,customerId } = validatedFields.data;
+  const date = new Date().toISOString();
+
+  // Insert data into the database
+  try {
+    await sql`
+      INSERT INTO g_issues (title,description,status,engineer_id,customer_id,opened,modified)
+      VALUES (${title}, ${description}, ${status},${engineerId},${customerId},${date},${date})
+    `;
+  } catch (error) {
+    // If a database error occurs, return a more specific error.
+    console.log(error)
+    return {
+      message: 'Database Error: Failed to Create issue.',
+    };
+  }
+
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath('/dashboard/issues');
+  redirect('/dashboard/issues');
+}
+
+export async function updateIssue(
+  id: string,
+  prevState: issueState,
+  formData: FormData,
+) {
+  console.log(formData)
+  const validatedFields = UpdateIssue.safeParse({
+    title: formData.get('title'),
+    description: formData.get('description'),
+    status: formData.get('status'),
+    engineerId: formData.get('engineerId'),
+    customerId: formData.get('customerId'),
+  });
+  console.log(validatedFields.data)
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Customer.',
+    };
+  }
+
+  const { title,description,status,engineerId,customerId } = validatedFields.data;
+  const date = new Date().toISOString();
+
+  try {
+    await sql`
+      UPDATE g_issues
+      SET title = ${title}, description = ${description},status=${status},engineer_id=${engineerId},customer_id=${customerId}
+          ,modified = ${date}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    return { message: 'Database Error: Failed to Update Issues.' };
+  }
+
+  revalidatePath('/dashboard/issues');
+  redirect('/dashboard/issues');
+}
+
+export async function deleteIssue(id: string) {
+  // throw new Error('Failed to Delete Engineer');
+  try {
+    await sql`DELETE FROM g_issues WHERE id = ${id}`;
+    revalidatePath('/dashboard/issues');
+    return { message: 'Deleted Issues' };
+  } catch (error) {
+    console.log(error)
+    return { message: 'Database Error: Failed to Delete Issue.' };
+  }
+}
+
+
+
 const phoneRegex = new RegExp(
   /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
 );
+
+const CustomerSchema = z.object({
+  id: z.string(),
+  name: z.string().min(2,{ message: "Must be input Name" }),
+  email: z.string().email({ message: "invalid input" }),
+  phone: z.string().regex(phoneRegex, 'Invalid Number!'),
+  duty: z.string().min(2,{ message: "Must be input Name" }),
+  companyId: z.string({ invalid_type_error: 'Please select a company.', }),
+  // companyName: z.string(),
+});
+
+export type cusState = {
+  errors?: {
+    name?: string[];
+    email?: string[];
+    phone?: string[];
+    duty?: string[];
+    companyId?: string[];
+    companyName?: string[];
+  };
+  message?: string | null;
+};
+
+const CreateCustomer = CustomerSchema.omit({ id: true });
+const UpdateCustomer = CustomerSchema.omit({ id: true });
+
+export async function createCustomer(prevState: cusState, formData: FormData) {
+  // Validate form fields using Zod
+  const validatedFields = CreateCustomer.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    phone: formData.get('phone'),
+    duty: formData.get('duty'),
+    companyId: formData.get('companyId'),
+  });
+
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Engineer.',
+    };
+  }
+
+  // Prepare data for insertion into the database
+  console.log(validatedFields.data)
+  const { name, email, phone, duty,companyId } = validatedFields.data;
+
+  // Insert data into the database
+  try {
+    await sql`
+      INSERT INTO g_customers (name,email,phone,duty,company_id)
+      VALUES (${name}, ${email}, ${phone},${duty},${companyId})
+    `;
+  } catch (error) {
+    // If a database error occurs, return a more specific error.
+    console.log(error)
+    return {
+      message: 'Database Error: Failed to Create customer.',
+    };
+  }
+
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath('/dashboard/customers');
+  redirect('/dashboard/customers');
+}
+
+export async function updateCustomer(
+  id: string,
+  prevState: cusState,
+  formData: FormData,
+) {
+  const validatedFields = UpdateCustomer.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    phone: formData.get('phone'),
+    duty: formData.get('duty'),
+    companyId: formData.get('companyId'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Customer.',
+    };
+  }
+
+  const { name, email, phone, duty,companyId } = validatedFields.data;
+
+  try {
+    await sql`
+      UPDATE g_customers
+      SET name = ${name}, email = ${email},phone=${phone},duty=${duty},company_id=${companyId}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    return { message: 'Database Error: Failed to Update Customer.' };
+  }
+
+  revalidatePath('/dashboard/customers');
+  redirect('/dashboard/customers');
+}
+
+export async function deleteCustomer(id: string) {
+  // throw new Error('Failed to Delete Engineer');
+  try {
+    await sql`DELETE FROM g_customers WHERE id = ${id}`;
+    revalidatePath('/dashboard/customers');
+    return { message: 'Deleted Customers' };
+  } catch (error) {
+    console.log(error)
+    return { message: 'Database Error: Failed to Delete Customer.' };
+  }
+}
+
+
 
 const EngineerSchema = z.object({
   id: z.string(),

@@ -1,15 +1,15 @@
-import Pagination from '@/app/ui/customers/pagination';
+import Pagination from '@/app/ui/issues/pagination';
 import Search from '@/app/ui/search';
-import Table from '@/app/ui/customers/table';
-import { CreateCustomer } from '@/app/ui/customers/buttons';
+import Table from '@/app/ui/issues/table';
+import { CreateIssue } from '@/app/ui/issues/buttons';
 import { lusitana } from '@/app/ui/fonts';
 import { DefaultSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
-import { fetchCustomersPages } from '@/app/lib/data';
+import { fetchIssuesPages } from '@/app/lib/data';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Customers',
+  title: 'Issues',
 };
 
 export default async function Page({
@@ -23,16 +23,16 @@ export default async function Page({
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
 
-  const totalPages = await fetchCustomersPages(query);
+  const totalPages = await fetchIssuesPages(query);
 
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
-        <h1 className={`${lusitana.className} text-2xl`}>Customers</h1>
+        <h1 className={`${lusitana.className} text-2xl`}>issues</h1>
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Search placeholder="Search customers..." />
-        <CreateCustomer />
+        <Search placeholder="Search issues..." />
+        <CreateIssue />
       </div>
       <Suspense key={query + currentPage} fallback={<DefaultSkeleton />}>
         <Table query={query} currentPage={currentPage} />

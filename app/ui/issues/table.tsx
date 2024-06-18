@@ -1,55 +1,67 @@
-import { gfetchFilteredCustomers  } from '@/app/lib/data';
-import { UpdateCustomer, DeleteCustomer } from '@/app/ui/customers/buttons';
-// import { Deletecustomer, Updatecustomer } from './buttons';
+import { fetchFilteredIssues  } from '@/app/lib/data';
+import { formatDateToLocal} from '@/app/lib/utils';
+import { UpdateIssue, DeleteIssue } from '@/app/ui/issues/buttons';
+import IssueStatus from '@/app/ui/issues/status';
+// import { Deleteissue, Updateissue } from './buttons';
 
-export default async function CustomersTable({
+export default async function issuesTable({
   query,
   currentPage,
 }: {
   query: string;
   currentPage: number;
 }) {
-  const customers = await gfetchFilteredCustomers(query, currentPage);
+  const issues = await fetchFilteredIssues(query, currentPage);
 
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
-            {customers?.map((customer) => (
+            {issues?.map((issue) => (
               <div
-                key={customer.id}
+                key={issue.id}
                 className="mb-2 w-full rounded-md bg-white p-4"
               >
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="text-sm text-gray-500">{customer.name}</p>
+                    <p className="text-sm text-gray-500">{issue.title}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="text-sm text-gray-500">{customer.email}</p>
+                    <p className="text-sm text-gray-500">{issue.description}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="text-sm text-gray-500">{customer.duty}</p>
+                    <p className="text-sm text-gray-500">{issue.status}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="text-sm text-gray-500">{customer.phone}</p>
+                    <p className="text-sm text-gray-500">{formatDateToLocal(issue.opened)}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="text-sm text-gray-500">{customer.company_name}</p>
+                    <p className="text-sm text-gray-500">{formatDateToLocal(issue.modified)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between border-b pb-4">
+                  <div>
+                    <p className="text-sm text-gray-500">{issue.engineer_nick_name} {issue.engineer_duty}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between border-b pb-4">
+                  <div>
+                    <p className="text-sm text-gray-500">{issue.customer_name} {issue.customer_duty}</p>
                   </div>
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <div className="flex justify-end gap-2">
-                    <UpdateCustomer id={customer.id} />
-                    <DeleteCustomer id={customer.id} />
+                    <UpdateIssue id={issue.id} />
+                    <DeleteIssue id={issue.id} />
                   </div>
                 </div>
               </div>
@@ -59,19 +71,31 @@ export default async function CustomersTable({
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Name
+                 Title
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Email
+                 Description
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                Status
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Opened
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Modified
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Owner
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Duty
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Phone
+                  Customer
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Company
+                  Duty
                 </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   <span className="sr-only">Edit</span>
@@ -79,31 +103,42 @@ export default async function CustomersTable({
               </tr>
             </thead>
             <tbody className="bg-white">
-              {customers?.map((customer) => (
+              {issues?.map((issue) => (
                 <tr
-                  key={customer.id}
+                  key={issue.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
                    <td className="whitespace-nowrap px-3 py-3">
-                    {customer.name}
+                    {issue.title}
                   </td>
                    <td className="whitespace-nowrap px-3 py-3">
-                    {customer.email}
+                    {issue.description}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {customer.duty}
+                    <IssueStatus status={issue.status} />
                   </td>
                    <td className="whitespace-nowrap px-3 py-3">
-                    {customer.phone}
+                    {formatDateToLocal(issue.opened)}
                   </td>
                    <td className="whitespace-nowrap px-3 py-3">
-                    {customer.company_name}
+                    {formatDateToLocal(issue.modified)}
                   </td>
-                  
+                    <td className="whitespace-nowrap px-3 py-3">
+                    {issue.engineer_nick_name} 
+                  </td>                 
+                    <td className="whitespace-nowrap px-3 py-3">
+                  {issue.engineer_duty}
+                  </td>                 
+                   <td className="whitespace-nowrap px-3 py-3">
+                    {issue.customer_name}
+                  </td>
+                   <td className="whitespace-nowrap px-3 py-3">
+                    {issue.customer_duty}
+                  </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <UpdateCustomer id={customer.id} />
-                      <DeleteCustomer id={customer.id} />
+                      <UpdateIssue id={issue.id} />
+                      <DeleteIssue id={issue.id} />
                     </div>
                   </td>
                 </tr>

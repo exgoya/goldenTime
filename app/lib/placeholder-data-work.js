@@ -94,14 +94,20 @@ const gIssues = [
     title : "test1",
     description : "test",
     status : "open",
-    locationId : gLocations[0].id
+    opened : "2024-06-17 15:30:00",
+    modified : "2024-06-17 15:30:00",
+    engineerId : gEngineers[0].id  ,
+    customerId : gCustomers[0].id,
   },
   {
     id : '1de65517-590f-47e5-88dd-f775dbd4beb0',
     title : "test2",
     description : "test",
-    status : "open",
-    locationId : gLocations[0].id
+    status : "close",
+    opened : "2024-06-17 15:30:00",
+    modified : "2024-06-17 15:30:00",
+    engineerId : gEngineers[0].id  ,
+    customerId : gCustomers[0].id,
   },
 ]
 

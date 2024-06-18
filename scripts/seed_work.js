@@ -222,7 +222,10 @@ async function seedIssues(client) {
         title VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
         status VARCHAR(255) NOT NULL,
-        location_id UUID NOT NULL
+        opened TIMESTAMP NOT NULL,
+        modified TIMESTAMP NOT NULL,
+        engineer_id UUID NOT NULL,
+        customer_id UUID NOT NULL
       );
     `;
 
@@ -232,8 +235,8 @@ async function seedIssues(client) {
     const insertedIssues = await Promise.all(
       gIssues.map(
         (issue) => client.sql`
-        INSERT INTO g_issues (id, title, description, status, location_id)
-        VALUES (${issue.id}, ${issue.title}, ${issue.description},${issue.status},${issue.locationId})
+        INSERT INTO g_issues (id, title, description, status,opened,modified, engineer_id, customer_id )
+        VALUES (${issue.id}, ${issue.title}, ${issue.description},${issue.status},${issue.opened},${issue.modified},${issue.engineerId},${issue.customerId})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
