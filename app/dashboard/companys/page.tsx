@@ -1,15 +1,15 @@
-import Pagination from '@/app/ui/locations/pagination';
+import Pagination from '@/app/ui/companys/pagination';
 import Search from '@/app/ui/search';
-import Table from '@/app/ui/locations/table';
-import { CreateLocation } from '@/app/ui/locations/buttons';
+import Table from '@/app/ui/companys/table';
+import { CreateCompany } from '@/app/ui/companys/buttons';
 import { lusitana } from '@/app/ui/fonts';
 import { DefaultSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
-import { fetchLocationsPages } from '@/app/lib/data';
+import { fetchCompanysPages } from '@/app/lib/data';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Locations',
+  title: 'Companys',
 };
 
 export default async function Page({
@@ -23,16 +23,16 @@ export default async function Page({
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
 
-  const totalPages = await fetchLocationsPages(query);
+  const totalPages = await fetchCompanysPages(query);
 
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
-        <h1 className={`${lusitana.className} text-2xl`}>Locations</h1>
+        <h1 className={`${lusitana.className} text-2xl`}>Companys</h1>
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Search placeholder="Search locations..." />
-        <CreateLocation />
+        <Search placeholder="Search companys..." />
+        <CreateCompany />
       </div>
       <Suspense key={query + currentPage} fallback={<DefaultSkeleton/>}>
         <Table query={query} currentPage={currentPage} />

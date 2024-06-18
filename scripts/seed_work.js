@@ -62,7 +62,7 @@ async function seedEngineers(client) {
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     duty VARCHAR(255) NOT NULL,
-    mobile VARCHAR(255) NOT NULL,
+    phone VARCHAR(255) NOT NULL,
     company_id UUID NOT NULL
   );
 `;
@@ -73,8 +73,8 @@ async function seedEngineers(client) {
     const insertedGEngineer = await Promise.all(
       gEngineers.map(
         (engineer) => client.sql`
-        INSERT INTO g_engineers (id,nick_name,name,email,duty,mobile,company_id)
-        VALUES (${engineer.id}, ${engineer.nickName}, ${engineer.name},${engineer.email},${engineer.duty},${engineer.mobile},${engineer.companyId})
+        INSERT INTO g_engineers (id,nick_name,name,email,duty,phone,company_id)
+        VALUES (${engineer.id}, ${engineer.nickName}, ${engineer.name},${engineer.email},${engineer.duty},${engineer.phone},${engineer.companyId})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
@@ -103,7 +103,7 @@ async function seedCustomers(client) {
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL,
         duty VARCHAR(255) NOT NULL,
-        mobile VARCHAR(255) NOT NULL,
+        phone VARCHAR(255) NOT NULL,
         company_id UUID NOT NULL
       );
     `;
@@ -114,8 +114,8 @@ async function seedCustomers(client) {
     const insertedCustomers = await Promise.all(
       gCustomers.map(
         (customer) => client.sql`
-        INSERT INTO g_customers (id, name, email, duty,mobile, company_id )
-        VALUES (${customer.id}, ${customer.name}, ${customer.email} ,${customer.duty},${customer.mobile}, ${customer.companyId})
+        INSERT INTO g_customers (id, name, email, duty,phone, company_id )
+        VALUES (${customer.id}, ${customer.name}, ${customer.email} ,${customer.duty},${customer.phone}, ${customer.companyId})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
@@ -142,8 +142,7 @@ async function seedCompanys(client) {
       CREATE TABLE IF NOT EXISTS g_companys (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        description TEXT NULL,
-        location_id UUID NOT NULL
+        description TEXT NULL
       );
     `;
 
@@ -153,8 +152,8 @@ async function seedCompanys(client) {
     const insertedCompanys = await Promise.all(
       gCompanys.map(
         (company) => client.sql`
-        INSERT INTO g_companys (id, name,  description,location_id)
-        VALUES (${company.id}, ${company.name}, ${company.description}, ${company.locationId})
+        INSERT INTO g_companys (id, name,  description)
+        VALUES (${company.id}, ${company.name}, ${company.description})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),

@@ -26,19 +26,6 @@ export type Invoice = {
   status: 'pending' | 'paid';
 };
 
-export type Location = {
-  id: string;
-  name: string;
-  address: string;
-  detail_address: string;
-  description:string;
-}
-
-export type Revenue = {
-  month: string;
-  revenue: number;
-};
-
 export type LatestInvoice = {
   id: string;
   name: string;
@@ -63,6 +50,46 @@ export type InvoicesTable = {
   status: 'pending' | 'paid';
 };
 
+
+export type Engineer = {
+  id: string;
+  nick_name: string;
+  name: string;
+  email: string;
+  duty: string;
+  phone: string;
+  company_id : string;
+};
+
+export type EngineerTable = {
+  id: string;
+  nick_name: string;
+  name: string;
+  email: string;
+  duty: string;
+  phone: string;
+  company_id : string;
+  company_name : string;
+};
+
+
+export type Company = {
+  id: string;
+  name: string;
+  description:string;
+}
+export type Location = {
+  id: string;
+  name: string;
+  address: string;
+  detail_address: string;
+  description:string;
+}
+
+export type Revenue = {
+  month: string;
+  revenue: number;
+};
 export type CustomersTableType = {
   id: string;
   name: string;

@@ -27,22 +27,18 @@ const gLocations = [
   },
 ]
 
-
 const gCompanys = [
     {
       id : 'f80b8505-e5e0-4d34-bf3d-8831b6e443d5',
       name : 'sunjesoft',
       description : "blbab",
-      locationId : gLocations[0].id,
     },
     {
       id : '2d0ccda4-e916-4589-af5d-f9bc1da34708',
       name : 'SKT C&C',
       description : "",
-      locationId : gLocations[0].id,
     }
 ]
-
 
 const gEngineers = [
   {
@@ -51,7 +47,7 @@ const gEngineers = [
     name : 'Lee Seonghoon',
     email : 'goya@sunjesoft.com',
     duty : 'senior',
-    mobile : '010-3333-3333',
+    phone : '010-3333-3333',
     companyId : gCompanys[0].id,
   },
   {
@@ -60,7 +56,7 @@ const gEngineers = [
     name : 'An bohyun',
     email : 'anbo@sunjesoft.com',
     duty : 'senior',
-    mobile : '010-3333-3333',
+    phone : '010-3333-3333',
     companyId : gCompanys[0].id,
   },
   {
@@ -69,7 +65,7 @@ const gEngineers = [
     name : 'Jo sua',
     email : 'suamj@sunjesoft.com',
     duty : 'senior',
-    mobile : '010-3333-3333',
+    phone : '010-3333-3333',
     companyId : gCompanys[0].id,
   }
 ]
@@ -80,7 +76,7 @@ const gCustomers = [
     name : '김철수',
     email : 'test@test.com',
     duty : 'test',
-    mobile : '010-3333-3333',
+    phone : '010-3333-3333',
     companyId :gCompanys[1].id,
   },
   {
@@ -88,7 +84,7 @@ const gCustomers = [
     name : '홍길동',
     email : 'test@test.com',
     duty : '차장',
-    mobile :'010-0001-0001',
+    phone :'010-0001-0001',
     companyId :gCompanys[1].id,
   },
 ]

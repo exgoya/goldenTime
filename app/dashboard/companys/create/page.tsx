@@ -1,9 +1,9 @@
-import Form from '@/app/ui/locations/create-form';
+import Form from '@/app/ui/companys/create-form';
 import Breadcrumbs from '@/app/ui/locations/breadcrumbs';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Create Locaiton',
+  title: 'Create Company',
 };
 
 export default async function Page() {
@@ -12,10 +12,10 @@ export default async function Page() {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: 'Locations', href: '/dashboard/locations' },
+          { label: 'Companys', href: '/dashboard/companys' },
           {
-            label: 'Create Location',
-            href: '/dashboard/Location/create',
+            label: 'Create Companys',
+            href: '/dashboard/Company/create',
             active: true,
           },
         ]}
