@@ -111,26 +111,42 @@ const gIssues = [
   },
 ]
 
+const gTypes = [
+  {
+    id:'c3df7427-e97e-43a7-a7b3-57e9af3e15a7',
+    name:'install'
+  },
+  {
+    id:'9daad5b4-e29f-45d5-85e3-e8e4a38f7bbd',
+    name:'test'
+  }
+]
 const gServices = [
   {
     engineerId : gEngineers[0].id,
-    startTime : '2024-06-17 15:30:00',
-    endTime : '2024-06-18 01:30:00',
-    type: 'install',
-    isOnline : false,
-    comment : "what to dooo...",
     issueId : gIssues[0].id,
     locationId : gLocations[0].id,
+    customerId : gCustomers[0].id,
+    type_id : gTypes[0].id,
+    beginTime : '2024-06-17 15:30:00',
+    endTime : '2024-06-18 01:30:00',
+    diffTime : '10',
+    isOnline : false,
+    comment : "what to dooo...",
+    modified : '2024-06-17 15:30:00',
   },
   {
     engineerId : gEngineers[0].id,
-    startTime : '2024-06-17 15:30:00',
-    endTime : '2024-06-18 01:30:00',
-    type: 'install',
-    isOnline : false,
-    comment : "what to dooo...",
     issueId : gIssues[0].id,
     locationId : gLocations[0].id,
+    customerId : gCustomers[0].id,
+    type_id : gTypes[0].id,
+    beginTime : '2024-06-17 15:30:00',
+    endTime : '2024-06-18 01:30:00',
+    diffTime : '20',
+    isOnline : false,
+    comment : "what to dooo...",
+    modified : '2024-06-17 15:30:00',
   },
 ];
 
@@ -141,7 +157,8 @@ module.exports = {
   gCompanys,
   gLocations,
   gIssues,
-  gServices
+  gServices,
+  gTypes,
 };
 
 // Home - summary dashboards

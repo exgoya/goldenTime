@@ -69,6 +69,166 @@ export type companyState = {
 const CreateCompany = CompanySchema.omit({ id: true });
 const UpdateCompany = CompanySchema.omit({ id: true });
 
+const ServiceSchema = z.object({
+  id: z.string(),
+  engineerId: z.string({ invalid_type_error: 'Please select a engineer.', }),
+  issueId: z.string({ invalid_type_error: 'Please select a issue.', }),
+  customerId: z.string({ invalid_type_error: 'Please select a customer.', }),
+  locationId: z.string({ invalid_type_error: 'Please select a customer.', }),
+  typeId: z.string({ invalid_type_error: 'Please select a customer.', }),
+  // beginTime: z.string().datetime({message: 'date type error.'}),
+  // endTime: z.string().datetime({message: 'date type error.'}),
+  beginTime: z.string(),
+  endTime: z.string(),
+  isOnline: z.enum(['true', 'false'], {
+      invalid_type_error: 'Please select an invoice status.',
+    }),
+  comment: z.string({ invalid_type_error: 'Please select a customer.', }),
+  modified: z.string(),
+});
+
+export type serviceState = {
+  errors?: {
+    engineerId?: string[];
+    IssueId?: string[];
+    customerId?: string[];
+    locationId?: string[];
+    typeId?: string[];
+    comment?: string[];
+    beginTime?: string[];
+    endTime?: string[];
+    isOnline?: string[];
+  };
+  message?: string | null;
+};
+
+const CreateService = ServiceSchema.omit({ id: true, modified:true });
+const UpdateService = ServiceSchema.omit({ id: true, modified:true });
+
+export async function createService(prevState: serviceState, formData: FormData) {
+  // Validate form fields using Zod
+
+  console.log(formData)
+  const validatedFields = CreateService.safeParse({
+    engineerId: formData.get('engineerId'),
+    issueId: formData.get('issueId'),
+    customerId: formData.get('customerId'),
+    locationId: formData.get('locationId'),
+    typeId: formData.get('typeId'),
+    comment: formData.get('comment'),
+    beginTime: formData.get('beginTime'),
+    endTime: formData.get('endTime'),
+    isOnline: formData.get('isOnline'),
+  });
+
+  console.log(validatedFields.data)
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    console.log(validatedFields.error)
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Service.',
+    };
+  }
+
+  // Prepare data for insertion into the database
+  console.log(validatedFields.data)
+  const { engineerId,issueId,customerId,locationId,typeId,comment,beginTime,endTime,isOnline } = validatedFields.data;
+
+  const date_beginTime = Date.parse(beginTime)
+  const date_endTime = Date.parse(endTime)
+  const diff_time = date_endTime-date_beginTime;
+  const date = new Date().toISOString();
+
+  // Insert data into the database
+  try {
+    await sql`
+      INSERT INTO g_service (engineer_id,issue_id,customer_id,location_id,type_id,comment,begin_time,end_time,diff_time,is_online,modified)
+      VALUES (${engineerId}, ${issueId}, ${customerId},${locationId},${typeId},${comment},${date_beginTime},${date_endTime},${diff_time},${isOnline},${date})
+       `;
+  } catch (error) {
+    // If a database error occurs, return a more specific error.
+    console.log(error)
+    return {
+      message: 'Database Error: Failed to Create service.',
+    };
+  }
+
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath('/dashboard/services');
+  redirect('/dashboard/services');
+}
+
+export async function updateService(
+  id: string,
+  prevState: serviceState,
+  formData: FormData,
+) {
+  console.log(formData)
+  const validatedFields = UpdateService.safeParse({
+    engineerId: formData.get('engineerId'),
+    issueId: formData.get('issueId'),
+    customerId: formData.get('customerId'),
+    locationId: formData.get('locationId'),
+    typeId: formData.get('typeId'),
+    comment: formData.get('comment'),
+    beginTime: formData.get('beginTime'),
+    endTime: formData.get('endTime'),
+    isOnline: formData.get('isOnline'),
+    
+ });
+  console.log(validatedFields.data)
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update service.',
+    };
+  }
+  const { engineerId,issueId,customerId,locationId,typeId,comment,beginTime,endTime,isOnline } = validatedFields.data;
+
+  const date_beginTime = Date.parse(beginTime)
+  const date_endTime = Date.parse(endTime)
+  const diff_time = date_endTime-date_beginTime;
+  const date = new Date().toISOString();
+
+  try {
+    await sql`
+      UPDATE g_services
+      SET 
+        engineer_id = ${engineerId}, 
+        issue_id = ${issueId},
+        customer_id=${customerId},
+        location_id=${locationId},
+        type_id=${typeId},
+        comment= ${comment},
+        begin_time= ${beginTime},
+        end_time= ${endTime},
+        diff_time= ${diff_time},
+        is_online= ${isOnline},
+        modified=${date}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    return { message: 'Database Error: Failed to Update Service.' };
+  }
+
+  revalidatePath('/dashboard/services');
+  redirect('/dashboard/services');
+}
+
+export async function deleteService(id: string) {
+  // throw new Error('Failed to Delete Engineer');
+  try {
+    await sql`DELETE FROM g_services WHERE id = ${id}`;
+    revalidatePath('/dashboard/services');
+    return { message: 'Deleted Services' };
+  } catch (error) {
+    console.log(error)
+    return { message: 'Database Error: Failed to Delete Services.' };
+  }
+}
+
+
 
 const IssueSchema = z.object({
   id: z.string(),

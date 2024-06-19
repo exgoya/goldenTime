@@ -7,6 +7,7 @@ const {
   gLocations,
   gIssues,
   gServices,
+  gTypes,
 } = require('../app/lib/placeholder-data-work.js')
 const bcrypt = require('bcrypt');
 
@@ -254,6 +255,44 @@ async function seedIssues(client) {
   }
 }
 
+async function seedTypes(client) {
+  try {
+    await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+    // Create the "services" table if it doesn't exist
+    const createTable = await client.sql`
+      CREATE TABLE IF NOT EXISTS g_types (
+        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+        name VARCHAR(255)
+      );
+    `;
+
+    console.log(`Created "types" table`);
+
+    // Insert data into the "services" table
+    const insertedTypes = await Promise.all(
+      gTypes.map(
+        (type) => client.sql`
+        INSERT INTO g_Types (id, name)
+        VALUES (${type.id},${type.name})
+        ON CONFLICT (id) DO NOTHING;
+      `,
+      ),
+    );
+
+    console.log(`Seeded ${insertedTypes.length} services`);
+
+    return {
+      createTable,
+      gTypes: insertedTypes,
+    };
+  } catch (error) {
+    console.error('Error seeding services:', error);
+    throw error;
+  }
+}
+
+
 async function seedServices(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
@@ -263,13 +302,16 @@ async function seedServices(client) {
       CREATE TABLE IF NOT EXISTS g_services (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         engineer_id UUID NOT NULL,
-        start_time timestamp DEFAULT CURRENT_TIMESTAMP,
+        issue_id UUID NOT NULL,
+        customer_id UUID NOT NULL,
+        location_id UUID NOT NULL,
+        type_id UUID NOT NULL,
+        begin_time timestamp DEFAULT CURRENT_TIMESTAMP,
         end_time timestamp   DEFAULT CURRENT_TIMESTAMP,
-        type VARCHAR(255) NOT NULL,
+        diff_time VARCHAR(10),
         is_online BOOLEAN NOT NULL DEFAULT false,
         comment TEXT NOT NULL,
-        issue_id UUID NOT NULL,
-        location_id UUID NOT NULL
+        modified timestamp   DEFAULT CURRENT_TIMESTAMP
       );
     `;
 
@@ -279,8 +321,8 @@ async function seedServices(client) {
     const insertedServices = await Promise.all(
       gServices.map(
         (service) => client.sql`
-        INSERT INTO g_services (engineer_id, start_time, end_time,type,is_online, comment, issue_id, location_id)
-        VALUES (${service.engineerId},${service.startTime},${service.endTime},${service.type},${service.isOnline},${service.comment},${service.issueId},${service.locationId})
+        INSERT INTO g_services (engineer_id, issue_id,customer_id,location_id,type_id,begin_time, end_time,diff_time,is_online, comment, modified)
+        VALUES (${service.engineerId},${service.issueId},${service.customerId},${service.locationId},${service.type_id},${service.beginTime},${service.endTime},${service.diffTime},${service.isOnline},${service.comment},${service.modified})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
@@ -308,6 +350,7 @@ async function main() {
   await seedLocations(client);
   await seedIssues(client);
   await seedServices(client);
+  await seedTypes(client);
 
   await client.end();
 }

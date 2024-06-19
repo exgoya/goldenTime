@@ -15,7 +15,12 @@ import {
   GcustomerTable,
   issueTable,
   issue,
-  EngineerField
+  EngineerField,
+  Service,
+  ServiceTable,
+  LocationField,
+  IssueField,
+  Type
 } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
@@ -300,6 +305,118 @@ export async function fetchIssueById(id: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch issue.');
+  }
+}
+
+
+export async function fetchFilteredServices(
+  query: string,
+  currentPage: number,
+) {
+  noStore();
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const services = await sql<ServiceTable>`
+      SELECT
+        s.id,
+        s.begin_time,
+        s.end_time,
+        s.diff_time,
+        s.is_online,
+        s.comment,
+        s.modified,
+        e.id as engineer_id,
+        e.nick_name as engineer_nick_name,
+        e.duty as engineer_duty,
+        i.id as issue_id,
+        i.title as issue_title,
+        i.status as issue_status,
+        c.id as customer_id,
+        c.name as customer_name,
+        c.duty as customer_duty,
+        l.id as location_id,
+        l.name as location_name,
+        t.id as type_id,
+        t.name as type_name 
+      FROM g_services s
+      LEFT JOIN g_engineers e ON s.id = s.engineer_id
+      LEFT JOIN g_issues i ON i.id = s.issue_id
+      LEFT JOIN g_customers c ON c.id = s.customer_id
+      LEFT JOIN g_locations l ON l.id = s.location_id
+      LEFT JOIN g_types t ON t.id = s.type_id
+      WHERE
+        s.comment ILIKE ${`%${query}%`} OR
+        e.name ILIKE ${`%${query}%`} OR
+        e.duty ILIKE ${`%${query}%`} OR
+        i.title ILIKE ${`%${query}%`} OR
+        i.status ILIKE ${`%${query}%`} OR
+        c.name ILIKE ${`%${query}%`} OR
+        c.duty ILIKE ${`%${query}%`} OR
+        l.name ILIKE ${`%${query}%`} OR
+        t.name ILIKE ${`%${query}%`}
+      ORDER BY s.modified desc
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+
+    console.log(services.rows)
+    return services.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch issues.');
+  }
+}
+
+export async function fetchServicesPages(query: string) {
+  noStore();
+  try {
+    const count = await sql`SELECT COUNT(*)
+      FROM g_services s
+      LEFT JOIN g_engineers e ON s.id = s.engineer_id
+      LEFT JOIN g_issues i ON i.id = s.issue_id
+      LEFT JOIN g_customers c ON c.id = s.customer_id
+      LEFT JOIN g_locations l ON l.id = s.location_id
+      LEFT JOIN g_types t ON t.id = s.type_id
+      WHERE
+        s.comment ILIKE ${`%${query}%`} OR
+        e.name ILIKE ${`%${query}%`} OR
+        e.duty ILIKE ${`%${query}%`} OR
+        i.title ILIKE ${`%${query}%`} OR
+        i.status ILIKE ${`%${query}%`} OR
+        c.name ILIKE ${`%${query}%`} OR
+        c.duty ILIKE ${`%${query}%`} OR
+        l.name ILIKE ${`%${query}%`} OR
+        t.name ILIKE ${`%${query}%`}
+ `;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of service.');
+  }
+}
+
+export async function fetchServiceById(id: string) {
+  noStore();
+  try {
+    const data = await sql<Service>`
+      SELECT
+        id,engineer_id,issue_id,customer_id,location_id,type_id,begin_time,end_time,diff_time,is_online,comment,modified
+      FROM g_services
+      WHERE id = ${id};
+    `;
+
+    const services = data.rows.map((service) => ({
+      ...service,
+      // Convert amount from cents to dollars
+    }));
+
+    console.log(services)
+    return services[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch services.');
   }
 }
 
@@ -628,6 +745,55 @@ export async function fetchLocationsById(id: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch location.');
+  }
+}
+export async function fetchTypes() {
+  try {
+    const data = await sql<Type>`
+      SELECT
+        id,
+        name
+      FROM g_types
+      ORDER BY name ASC
+    `;
+
+    return data.rows;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all type.');
+  }
+}
+export async function fetchIssues() {
+  try {
+    const data = await sql<IssueField>`
+      SELECT
+        id,
+        title     
+      FROM g_issues
+      ORDER BY title ASC
+    `;
+
+    return data.rows;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all issue ')
+  }
+}
+
+export async function fetchLocations() {
+  try {
+    const data = await sql<LocationField>`
+      SELECT
+        id,
+        name
+      FROM g_locations
+      ORDER BY name ASC
+    `;
+
+    return data.rows;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all locations.');
   }
 }
 

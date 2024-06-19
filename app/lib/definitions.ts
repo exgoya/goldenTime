@@ -15,6 +15,11 @@ export type Customer = {
   email: string;
   image_url: string;
 };
+export type Type = {
+  id: string;
+  name: string;
+};
+
 
 export type Invoice = {
   id: string;
@@ -68,6 +73,48 @@ export type GcustomerTable = {
   company_id : string;
   company_name : string;
 };
+
+export type Service = {
+  id: string;
+  engineer_id: string;
+  issue_id:string;
+  customer_id:string;
+  location_id:string;
+  type_id: string;
+  begin_time: string;
+  end_time: string;
+  diff_time: string;
+  is_online: 'true' | 'false';
+  comment: string;
+  modified: string;
+};
+
+export type ServiceTable = {
+  id: string;
+  engineer_id: string;
+  engineer_nick_name: string;
+  engineer_duty: string;
+  issue_id: string;
+  issue_title: string;
+  issue_status: string;
+  customer_id: string;
+  customer_name: string;
+  customer_duty: string;
+  location_id: string;
+  location_name: string;
+  type_id: string;
+  type_name: string;
+  begin_time: string;
+  end_time: string;
+  is_online: Boolean;
+  comment: string;
+  modified: string;
+};
+export type IssueField = {
+  id: string;
+  title: string;
+};
+
 
 export type issue = {
   id: string;
@@ -127,6 +174,12 @@ export type Company = {
   name: string;
   description:string;
 }
+
+export type LocationField = {
+  id: string;
+  name: string;
+}
+
 export type Location = {
   id: string;
   name: string;
